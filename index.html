@@ -1,662 +1,247 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <title>سیستم بررسی شیفت‌های جاستیس</title>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap");
+<head>
+<meta charset="UTF-8" />
+<title>سیستم بررسی شیفت‌های جاستیس</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap");
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Vazirmatn", sans-serif; background-color: #033d00; color: white; text-align: center; }
+header { padding: 20px; font-weight:bold; background: rgba(0,0,0,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.5); border-bottom:2px solid rgba(255,255,255,0.15); }
+.title { font-size:2.5rem; margin-bottom:10px; color:#ffffff; 	 }
+.clock { font-size:3.5rem; font-weight:bold; margin-bottom:10px; color:#fff; }
+.section { background: rgba(255,255,255,0.05); margin:20px auto; padding:20px; border-radius:20px; width:90%; max-width:900px; backdrop-filter: blur(10px); box-shadow:0 8px 30px rgba(0,0,0,0.35); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.section:hover { transform: translateY(-5px); box-shadow:0 12px 40px rgba(0,0,0,0.5); }
+h2 { margin-bottom:15px; color:#ffffff;  }
+table { width:100%; border-collapse:collapse; margin-top:15px; overflow-x:auto; border-radius:15px; }
+th, td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:center; }
+th { background: linear-gradient(135deg, rgba(165, 255, 161,0.4), rgba(199, 199, 199,0.05)); font-weight:bold; }
+tr:hover { background: rgba(255,255,255,0.07); transition: background 0.3s ease; }
+.shift-now { font-size:1.1rem; margin:10px 0; animation: fadeSlideUp 0.5s forwards; direction: rtl; }
+@keyframes fadeSlideUp { 0% { opacity:0; transform: translateY(10px); } 100% { opacity:1; transform: translateY(0); } }
+.tag { margin-right:6px; padding:2px 6px; border-radius:6px; font-size:0.8rem; font-weight:bold; display:inline-block; }
+.tag.Pilot { background: rgba(0,200,255,0.2); color:#00e6ff; }
+.tag.Station { background: rgba(0,255,100,0.2); color:#00ff88; }
+.tag.Food { background: rgba(255,180,0,0.2); color:#ffae00; }
+.tag.Tour { background: rgba(180,0,255,0.2); color:#c77dff; }
+.tag.Entertainment { background: rgba(255,0,100,0.2); color:#ff4081; }
+.tag.Management { background: rgba(0,0,128,0.3); color:#001f7f; }
+.on-leave { color:#ff4d4d; font-weight:bold; }
+.note-popup { position: fixed; left:50%; top:22%; transform: translateX(-50%) translateY(0); z-index:1000; display:none; width:min(92%,440px); max-width:440px; transition: transform 0.26s cubic-bezier(0.2,0.9,0.3,1), opacity 0.26s ease; opacity:0; box-shadow:0 14px 40px rgba(0,0,0,0.7); border-radius:16px; }
+.note-popup.show { display:block; opacity:1; }
+.note-border { background: rgba(255,255,255,0.95); border-radius:16px; padding:4px; }
+.note-inner { background: rgba(34,34,34,0.95); border-radius:16px; padding:16px; color:#fff; direction:rtl; box-sizing:border-box; }
+.note-inner textarea { width:100%; min-height:120px; resize:vertical; padding:10px; border-radius:12px; border:none; background: rgba(0,0,0,0.45); color:#fff; font-family:inherit; font-size:0.96rem; box-sizing:border-box; direction:rtl; }
+.note-actions { display:flex; gap:8px; justify-content:flex-start; margin-top:12px; }
+.btn { padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; border:none; background: rgba(255,255,255,0.06); color:#fff; font-family:"Vazirmatn",sans-serif; font-size:0.95rem; }
+.btn.primary { background: linear-gradient(180deg, #b4ffb0, #e2ffe0); color:#111; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow:0 6px 20px rgba(0,0,0,0.35);}
+.btn.primary:hover { transform: translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,0.4);}
+.btn.ghost { background: transparent; border:1px solid rgba(255,255,255,0.06); }
+.person-name { cursor:pointer; }
+#noteSaved { position:fixed; top:12px; left:50%; transform: translateX(-50%) translateY(-8px); background:#00c853; color:#fff; padding:10px 18px; border-radius:10px; box-shadow:0 8px 22px rgba(0,0,0,0.35); z-index:1100; opacity:0; transition: transform 0.28s ease, opacity 0.28s ease; }
+#noteSaved.show { opacity:1; transform: translateX(-50%) translateY(0); }
 
-      * {
-        box-sizing: border-box; /* اضافه شد تا همه عناصر از box-sizing: border-box استفاده کنند */
-      }
+/* انیمیشن ورود ردیف‌های جدول */
+@keyframes slideInFade { 0% { opacity:0; transform: translateX(-30px); } 100% { opacity:1; transform: translateX(0); } }
+#full-schedule tbody tr { opacity:0; transform: translateX(-30px); animation: slideInFade 0.6s forwards; }
 
-      body {
-        margin: 0;
-        font-family: "Vazirmatn", sans-serif;
-        background: linear-gradient(135deg, #10ff00	, #055200, #055200);
-        color: white;
-        text-align: center;
-        background-size: 400% 400%;
-        animation: bgAnimation 20s ease infinite;
-      }
+/* واکنش‌گرایی موبایل */
+@media(max-width:768px){
+  .title { font-size:1.6rem; }
+  .clock { font-size:2rem; }
+  .section { width:95%; padding:15px; overflow-x:auto; }
+  #exportBtn { width:100%; font-size:1.05rem; padding:14px 0; }
+  table, thead, tbody, th, td, tr { display:block; width:100%; }
+  thead { display:none; }
+  tr { margin-bottom:12px; background: rgba(255,255,255,0.05); border-radius:10px; padding:10px; }
+  td { border:none; padding:8px 10px; text-align:right; position:relative; }
+  td::before { content: attr(data-label); font-weight:bold; color:#ffffff; display:block; margin-bottom:5px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">سیستم بررسی شیفت‌های جاستیس</div>
+  <div class="clock" id="clock"></div>
+</header>
 
-      @keyframes bgAnimation {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
+<div class="section" id="current-shifts">
+  <h2>شیفت فعلی</h2>
+  <div id="shift-list"></div>
+</div>
 
-      header {
-        padding: 20px;
-        font-weight: bold;
-        background: rgba(0, 0, 0, 0.3);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-      }
+<div class="section">
+  <h2>جدول کامل شیفت‌ها</h2>
+  <table id="full-schedule">
+    <thead>
+      <tr>
+        <th>نام</th>
+        <th>رنک</th>
+        <th>روز / حالت</th>
+        <th>ساعت</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div style="margin:20px;">
+    <button class="btn primary" id="exportBtn">خروجی اکسل</button>
+  </div>
+</div>
 
-      .title {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        color: #ffffff;
-      }
-
-      .clock {
-        font-size: 3.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #ffffff;
-      }
-
-      .section {
-        background: rgba(5, 82, 0, 0.08);
-        margin: 20px auto;
-        padding: 20px;
-        border-radius: 20px;
-        width: 90%;
-        max-width: 900px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-
-      .section:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-      }
-
-      h2 {
-        margin-bottom: 15px;
-        color: #ffffff;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        overflow: hidden;
-        border-radius: 15px;
-      }
-
-      th,
-      td {
-        padding: 12px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        text-align: center;
-      }
-
-      th {
-        background: linear-gradient(
-          135deg,
-          rgba(155, 214, 135, 0.5),
-          rgba(26, 61, 15, 0.1)
-        );
-        font-weight: bold;
-      }
-
-      tr:hover {
-        background: rgba(255, 255, 255, 0.05);
-        transition: background 0.3s ease;
-      }
-
-      .shift-now {
-        font-size: 1.1rem;
-        margin: 10px 0;
-        animation: fadeIn 0.5s ease;
-        direction: rtl;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(5px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .tag {
-        margin-right: 6px;
-        padding: 2px 6px;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        display: inline-block;
-      }
-
-      .tag.Pilot {
-        background: rgba(0, 200, 255, 0.2);
-        color: #00e6ff;
-      }
-      .tag.Station {
-        background: rgba(0, 255, 100, 0.2);
-        color: #00ff88;
-      }
-      .tag.Food {
-        background: rgba(255, 180, 0, 0.2);
-        color: #ffae00;
-      }
-      .tag.Tour {
-        background: rgba(180, 0, 255, 0.2);
-        color: #c77dff;
-      }
-      .tag.Entertainment {
-        background: rgba(255, 0, 100, 0.2);
-        color: #ff4081;
-      }
-      .tag.Management {
-        background: rgba(0, 0, 128, 0.3);
-        color: #001f7f;
-      }
-      .on-leave {
-        color: #ff4d4d;
-        font-weight: bold;
-      }
-
-      /* note popup */
-      .note-popup {
-        position: fixed;
-        left: 50%;
-        top: 22%;
-        transform: translateX(-50%) translateY(0);
-        z-index: 1000;
-        display: none;
-        width: min(92%, 440px);
-        max-width: 440px;
-        transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1),
-          opacity 0.26s ease;
-        opacity: 0;
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
-        border-radius: 16px;
-      }
-      .note-popup.show {
-        display: block;
-        opacity: 1;
-      }
-
-      .note-border {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
-        padding: 4px;
-      }
-
-      .note-inner {
-        background: rgba(34, 34, 34, 0.95);
-        border-radius: 16px;
-        padding: 16px;
-        color: #fff;
-        direction: rtl; /* متن داخل راست چین شود */
-        box-sizing: border-box;
-      }
-
-      .note-inner textarea {
-        width: 100%;
-        min-height: 120px;
-        resize: vertical;
-        padding: 10px;
-        border-radius: 12px;
-        border: none;
-        background: rgba(0, 0, 0, 0.45);
-        color: #fff;
-        font-family: inherit;
-        font-size: 0.96rem;
-        box-sizing: border-box;
-        direction: rtl;
-      }
-
-      .note-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: flex-start;
-        margin-top: 12px;
-      }
-
-      .btn {
-        padding: 8px 14px;
-        border-radius: 8px;
-        font-weight: 700;
-        cursor: pointer;
-        border: none;
-        background: rgba(255, 255, 255, 0.06);
-        color: #fff;
-        font-family: "Vazirmatn", sans-serif;
-        font-size: 0.95rem;
-      }
-
-      .btn.primary {
-        background: linear-gradient(180deg, #076900, #caffc7);
-        color: #111;
-      }
-
-      .btn.ghost {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.06);
-      }
-
-      .person-name {
-        cursor: pointer;
-      }
-
-      #noteSaved {
-        position: fixed;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%) translateY(-8px);
-        background: #00c853;
-        color: #fff;
-        padding: 10px 18px;
-        border-radius: 10px;
-        z-index: 1100;
-        opacity: 0;
-        transition: transform 0.28s ease, opacity 0.28s ease;
-      }
-      #noteSaved.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-
-      @media (max-width: 768px) {
-        .title {
-          font-size: 1.6rem;
-        }
-        .clock {
-          font-size: 2rem;
-        }
-        table,
-        thead,
-        tbody,
-        th,
-        td,
-        tr {
-          display: block;
-          width: 100%;
-        }
-        thead {
-          display: none;
-        }
-        tr {
-          margin-bottom: 15px;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-          padding: 10px;
-        }
-        td {
-          border: none;
-          padding: 8px 10px;
-          text-align: right;
-          position: relative;
-        }
-        td::before {
-          content: attr(data-label);
-          font-weight: bold;
-          color: #ffffff;
-          display: block;
-          margin-bottom: 5px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="title">سیستم بررسی شیفت‌های جاستیس</div>
-      <div class="clock" id="clock"></div>
-    </header>
-
-    <div class="section" id="current-shifts">
-      <h2>شیفت فعلی</h2>
-      <div id="shift-list"></div>
-    </div>
-
-    <div class="section">
-      <h2>جدول کامل شیفت‌ها</h2>
-      <table id="full-schedule">
-        <thead>
-          <tr>
-            <th>نام</th>
-            <th>رنک</th>
-            <th>روز / حالت</th>
-            <th>ساعت</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- note popup -->
-    <div class="modal-overlay" id="modalOverlay" aria-hidden="true"></div>
-    <div
-      class="note-popup"
-      id="notePopup"
-      role="dialog"
-      aria-modal="true"
-      aria-hidden="true"
-    >
-      <div class="note-border">
-        <div class="note-inner">
-          <h3 id="noteTitle">یادداشت</h3>
-          <textarea
-            id="noteText"
-          ></textarea>
-          <div class="note-actions">
-            <button class="btn primary" id="saveNote">ذخیره</button>
-            <button class="btn ghost" id="closeNote">بستن</button>
-          </div>
-        </div>
+<div class="modal-overlay" id="modalOverlay" aria-hidden="true"></div>
+<div class="note-popup" id="notePopup" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="note-border">
+    <div class="note-inner">
+      <h3 id="noteTitle">یادداشت</h3>
+      <textarea id="noteText"></textarea>
+      <div class="note-actions">
+        <button class="btn primary" id="saveNote">ذخیره</button>
+        <button class="btn ghost" id="closeNote">بستن</button>
       </div>
     </div>
-    <div id="noteSaved">نوت ذخیره شد</div>
+  </div>
+</div>
+<div id="noteSaved">نوت ذخیره شد</div>
 
-    <audio
-      id="notifSound"
-      src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
-      preload="auto"
-    ></audio>
+<audio id="notifSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const shifts = [
+  { name:"Hoshan Amiri", rank:"Faction Helper", times:[{days:"همه روزها", start:"15:30", end:"18:30"}]},
+  { name:"Omid Ghamkhar", rank:"Faction Helper", times:[{days:"همه روزها", start:"16:00", end:"19:00"}]},
+  { name:"Artin Hamidi", rank:"Attorney General", times:[{days:"همه روزها", start:"19:00", end:"22:00"}]},
+  { name:"Giovanni Vitelli", rank:"Deputy Attorney General", times:[{days:"همه روزها", start:"14:00", end:"17:00"}]},
+  { name:"Mahbod Shalchi", rank:"Chief Justice", times:[{days:"همه روزها", start:"12:00", end:"15:00"}]},
+  { name:"Mohammad Kashanzadeh", rank:"Chief Justice", times:[{days:"همه روزها", start:"20:00", end:"23:00"}]},
+  { name:"MohammadTaha Rayat", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"Free Time", end:"Free Time"},]},
+  { name:"Mohammad Mansoori", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"14:00", end:"17:00"}]},
+  { name:"Dante Salvatore", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"15:00", end:"18:00"}]},
+  { name:"Mahdi Farhadi", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"18:00", end:"21:00"}]},
+  { name:"Michael Rock", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"20:00", end:"23:00"}]},
+  { name:"Radin Dehpana", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"17:00", end:"21:00"}]},];
 
-    <script>
-      // داده‌ها
-      const shifts = [
-        {
-          name: "Artin Hamidi",
-          rank: "Attorney General",
-          times: [{ days: "همه روزها", start: "19:00", end: "22:00" }],
-        },
-        {
-          name: "Giovanni Vitelli",
-          rank: "Deputy Attorney General",
-          times: [{ days: "همه روزها", start: "14:00", end: "17:00" }],
-        },
-        {
-          name: "Mahbod Shalchi",
-          rank: "Chief Justice",
-          times: [{ days: "همه روزها", start: "12:00", end: "15:00" }],
-        },
-        {
-          name: "Mohammad Kashanzadeh",
-          rank: "Chief Justice",
-          times: [{ days: "همه روزها", start: "20:00", end: "23:00" }],
-        },
-        {
-          name: "MohammadTaha Rayat",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "16:00", end: "19:00" }],
-        },
-        {
-          name: "Mahan Kazemi",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "17:45", end: "20:45" }],
-        },
-        {
-          name: "Dante Salvatore",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "15:00", end: "18:00" }],
-        },
-        {
-          name: "Mahdi Farhadi",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "18:00", end: "21:00" }],
-        },
-        {
-          name: "Michael Rock",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "20:00", end: "23:00" }],
-        },
-        {
-          name: "Radin Dehpana",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "17:00", end: "20:00" }],
-        },
-        {
-          name: "Arthur Neymar",
-          rank: "Assocciate Justice",
-          times: [{ days: "همه روزها", start: "13:00", end: "16:00" }],
-        },
-      ];
+const rankOrder = {"Faction Helper":1,"Attorney General":2,"Deputy Attorney General":3,"Chief Justice":4,"Assocciate Justice":5};
+function $(s){return document.querySelector(s);}
+function toPersianDigits(input){return String(input).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);}
+function renderTags(tags){return tags?tags.map(t=>`<span class="tag ${t}">[ ${t} ]</span>`).join(" "):"";}
+function timeToMins(t){const [h,m]=t.split(":").map(Number);return h*60+m;}
 
-      const rankOrder = {
-		"Attorney General": 1,
+// تغییر این تابع بر اساس روزهای هفته
+function isEvenDay(date){
+  const day=date.getDay(); // 0=یکشنبه، 6=شنبه
+  // شنبه=6 زوج, یکشنبه=0 فرد, دوشنبه=1 زوج, سه شنبه=2 فرد, چهارشنبه=3 زوج, پنج شنبه=4 فرد, جمعه=5 زوج
+  return [6,1,3,5].includes(day); // شنبه، دوشنبه، چهارشنبه، جمعه زوج
+}
 
+function updateClock(){const now=new Date();$("#clock").textContent=`${toPersianDigits(String(now.getHours()).padStart(2,"0"))}:${toPersianDigits(String(now.getMinutes()).padStart(2,"0"))}:${toPersianDigits(String(now.getSeconds()).padStart(2,"0"))}`;}
 
-
-      };
-
-      function $(s) {
-        return document.querySelector(s);
+let lastShiftHTML="";
+const notifiedByMinute=new Set();
+function getCurrentShifts(){
+  const now=new Date();
+  const curMins=now.getHours()*60+now.getMinutes();
+  const even=isEvenDay(now);
+  const startingNow=[];
+  const active=[];
+  shifts.slice().sort((a,b)=>(rankOrder[a.rank]||Infinity)-(rankOrder[b.rank]||Infinity)).forEach(person=>{
+    person.times.forEach(t=>{
+      let match=false;
+      if(t.days==="همه روزها") match=true;
+      if(t.days==="روز زوج"&&even) match=true;
+      if(t.days==="روز فرد"&&!even) match=true;
+      if(!match) return;
+      const start=timeToMins(t.start);
+      let end=timeToMins(t.end);
+      if(end===0) end=24*60;
+      let inShift=false, remain=0;
+      if(start<=end){ if(curMins>=start&&curMins<end){ inShift=true; remain=end-curMins; } }
+      else { if(curMins>=start||curMins<end){ inShift=true; remain=curMins>=start?24*60-curMins+end:end-curMins; } }
+      if(inShift){
+        const rh=Math.floor(remain/60), rm=remain%60;
+        const nameRank=`<span dir="ltr" style="display:inline-block;">${person.name} (${person.rank}) ${renderTags(person.tags)}</span>`;
+        const text=rh===0?`${nameRank} - ${toPersianDigits(rm)} دقیقه مانده`:`${nameRank} - ${toPersianDigits(rh)} ساعت و ${toPersianDigits(rm)} دقیقه مانده`;
+        active.push({text,name:person.name,start});
+        if(curMins===start) startingNow.push(person.name);
       }
-      function toPersianDigits(input) {
-        return String(input).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
-      }
-      function renderTags(tags) {
-        if (!tags) return "";
-        return tags
-          .map((t) => `<span class="tag ${t}">[ ${t} ]</span>`)
-          .join(" ");
-      }
-      function timeToMins(t) {
-        const [h, m] = t.split(":").map(Number);
-        return h * 60 + m;
-      }
+    });
+  });
+  return {active, startingNow, minuteKey:String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0")};
+}
 
-      // 🔹 اصلاح شده: روز زوج/فرد بر اساس روز هفته
-      function isEvenDay(date) {
-        // date.getDay(): 0=یکشنبه, 1=دوشنبه, 2=سه‌شنبه, 3=چهارشنبه, 4=پنج‌شنبه, 5=جمعه, 6=شنبه
-        // نگاشت: شنبه(6)، دوشنبه(1)، چهارشنبه(3) => زوج
-        const day = date.getDay();
-        const mapping = {
-          6: true,  // شنبه = زوج
-          1: true,  // دوشنبه = زوج
-          3: true,  // چهارشنبه = زوج
-          0: false, // یکشنبه = فرد
-          2: false, // سه‌شنبه = فرد
-          4: false, // پنج‌شنبه = فرد
-          5: false  // جمعه = فرد (می‌تونی این را تغییر بدی اگر خواستی جمعه را استثنا در نظر بگیری)
-        };
-        return mapping[day];
-      }
+async function handleStartNotifications(names, minuteKey){
+  const unique=Array.from(new Set(names)).sort();
+  const key=minuteKey+":"+unique.join(",");
+  if(notifiedByMinute.has(key)) return;
+  notifiedByMinute.add(key);
+  try{await $("#notifSound").play();}catch(e){}
+  const body=`شیفت ${unique.join(" و ")} شروع شد`;
+  if("Notification" in window){
+    if(Notification.permission==="granted"){ new Notification("شیفت شروع شد",{body}); }
+    else if(Notification.permission!=="denied"){ Notification.requestPermission().then(p=>{ if(p==="granted") new Notification("شیفت شروع شد",{body}); }); }
+  }
+}
 
-      // درخواست مجوز ناتیفیکیشن
-      if (
-        "Notification" in window &&
-        Notification.permission !== "granted" &&
-        Notification.permission !== "denied"
-      ) {
-        Notification.requestPermission();
-      }
+function renderCurrentShifts(){
+  const {active,startingNow,minuteKey}=getCurrentShifts();
+  if(startingNow.length>0) handleStartNotifications(startingNow,minuteKey);
+  const html=active.length?active.map(a=>`<div class="shift-now">${a.text}</div>`).join(""):`<div class="shift-now">در حال حاضر کسی در شیفت نیست</div>`;
+  if(html!==lastShiftHTML){$("#shift-list").innerHTML=html;lastShiftHTML=html;}
 
-      // ساعت
-      function updateClock() {
-        const now = new Date();
-        $("#clock").textContent = `${toPersianDigits(
-          String(now.getHours()).padStart(2, "0")
-        )}:${toPersianDigits(
-          String(now.getMinutes()).padStart(2, "0")
-        )}:${toPersianDigits(String(now.getSeconds()).padStart(2, "0"))}`;
-      }
+  const shiftEls = document.querySelectorAll(".shift-now");
+  shiftEls.forEach((el,i)=>{ el.style.animationDelay = (i*0.08) + "s"; });
+}
 
-      // شیفت‌ها و ناتیفیکیشن
-      let lastShiftHTML = "";
-      const notifiedByMinute = new Set();
-      function getCurrentShifts() {
-        const now = new Date();
-        const curMins = now.getHours() * 60 + now.getMinutes();
-        const even = isEvenDay(now);
-        const startingNow = [];
-        const active = [];
-        shifts
-          .slice()
-          .sort(
-            (a, b) =>
-              (rankOrder[a.rank] || Infinity) - (rankOrder[b.rank] || Infinity)
-          )
-          .forEach((person) => {
-            person.times.forEach((t) => {
-              let match = false;
-              if (t.days === "همه روزها") match = true;
-              if (t.days === "روز زوج" && even) match = true;
-              if (t.days === "روز فرد" && !even) match = true;
-              if (!match) return;
-              const start = timeToMins(t.start);
-              let end = timeToMins(t.end);
-              if (end === 0) end = 24 * 60;
-              let inShift = false,
-                remain = 0;
-              if (start <= end) {
-                if (curMins >= start && curMins < end) {
-                  inShift = true;
-                  remain = end - curMins;
-                }
-              } else {
-                if (curMins >= start || curMins < end) {
-                  inShift = true;
-                  remain =
-                    curMins >= start ? 24 * 60 - curMins + end : end - curMins;
-                }
-              }
-              if (inShift) {
-                const rh = Math.floor(remain / 60),
-                  rm = remain % 60;
-                const nameRank = `<span dir="ltr" style="display:inline-block;">${
-                  person.name
-                } (${person.rank}) ${renderTags(person.tags)}</span>`;
-                const text =
-                  rh === 0
-                    ? `${nameRank} - ${toPersianDigits(rm)} دقیقه مانده`
-                    : `${nameRank} - ${toPersianDigits(
-                        rh
-                      )} ساعت و ${toPersianDigits(rm)} دقیقه مانده`;
-                active.push({ text, name: person.name, start });
-                if (curMins === start) startingNow.push(person.name);
-              }
-            });
-          });
-        return {
-          active,
-          startingNow,
-          minuteKey:
-            String(now.getHours()).padStart(2, "0") +
-            ":" +
-            String(now.getMinutes()).padStart(2, "0"),
-        };
-      }
+let notes={};
+try{notes=JSON.parse(localStorage.getItem("taxiNotes")||"{}");}catch(e){}
+let currentNotePerson=null;
+const overlay=$("#modalOverlay"), popup=$("#notePopup"), noteText=$("#noteText"), noteSavedEl=$("#noteSaved");
+function attachNameEvents(){document.querySelectorAll(".person-name").forEach(el=>{
+  el.addEventListener("dblclick",()=>openNote(el.dataset.name));
+  el.addEventListener("click",()=>openNote(el.dataset.name));
+  el.addEventListener("mousedown", e=>e.preventDefault());
+});}
+function openNote(name){currentNotePerson=name;noteText.value=notes[name]||"";$("#noteTitle").textContent=`یادداشت برای: ${name}`;overlay.classList.add("show");overlay.setAttribute("aria-hidden","false");popup.classList.add("show");popup.setAttribute("aria-hidden","false");setTimeout(()=>noteText.focus(),120);}
+function closeNote(){popup.classList.remove("show");popup.setAttribute("aria-hidden","true");overlay.classList.remove("show");overlay.setAttribute("aria-hidden","true");}
+$("#saveNote").addEventListener("click",()=>{
+  if(!currentNotePerson) return;
+  notes[currentNotePerson]=noteText.value;
+  try{localStorage.setItem("taxiNotes",JSON.stringify(notes));}catch(e){}
+  noteSavedEl.classList.add("show");
+  setTimeout(()=>noteSavedEl.classList.remove("show"),1500);
+  closeNote();
+});
+$("#closeNote").addEventListener("click",closeNote);
+overlay.addEventListener("click",closeNote);
 
-      async function handleStartNotifications(names, minuteKey) {
-        const unique = Array.from(new Set(names)).sort();
-        const key = minuteKey + ":" + unique.join(",");
-        if (notifiedByMinute.has(key)) return;
-        notifiedByMinute.add(key);
-        try {
-          await $("#notifSound").play();
-        } catch (e) {}
-        const body = `شیفت ${unique.join(" و ")} شروع شد`;
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("شیفت شروع شد", { body });
-        }
-      }
-
-      function renderCurrentShifts() {
-        const { active, startingNow, minuteKey } = getCurrentShifts();
-        if (startingNow.length > 0)
-          handleStartNotifications(startingNow, minuteKey);
-        const html = active.length
-          ? active.map((a) => `<div class="shift-now">${a.text}</div>`).join("")
-          : `<div class="shift-now">در حال حاضر کسی در شیفت نیست</div>`;
-        if (html !== lastShiftHTML) {
-          $("#shift-list").innerHTML = html;
-          lastShiftHTML = html;
-        }
-      }
-
-      // جدول کامل
-      function renderFullSchedule() {
-        const tbody = $("#full-schedule tbody");
-        tbody.innerHTML = shifts
-          .slice()
-          .sort(
-            (a, b) =>
-              (rankOrder[a.rank] || Infinity) - (rankOrder[b.rank] || Infinity)
-          )
-          .map((p) =>
-            p.times
-              .map(
-                (t) => `
+function renderFullSchedule(){
+  const tbody=$("#full-schedule tbody");
+  tbody.innerHTML=shifts.slice().sort((a,b)=>(rankOrder[a.rank]||Infinity)-(rankOrder[b.rank]||Infinity))
+  .map(p=>p.times.map(t=>`
     <tr data-person="${p.name}">
-      <td data-label="نام"><span class="person-name" data-name="${p.name}">${
-                  p.name
-                }</span></td>
-      <td data-label="رنک"><span dir="ltr">${p.rank} ${renderTags(
-                  p.tags
-                )}</span></td>
+      <td data-label="نام"><span class="person-name" data-name="${p.name}">${p.name}</span></td>
+      <td data-label="رنک"><span dir="ltr">${p.rank} ${renderTags(p.tags)}</span></td>
       <td data-label="روز/حالت">${t.days}</td>
-      <td data-label="ساعت">${toPersianDigits(t.start)} تا ${toPersianDigits(
-                  t.end
-                )}</td>
-    </tr>
-  `
-              )
-              .join("")
-          )
-          .join("");
-        attachNameEvents();
-      }
+      <td data-label="ساعت">${toPersianDigits(t.start)} تا ${toPersianDigits(t.end)}</td>
+    </tr>`).join("")).join("");
+  attachNameEvents();
 
-      // یادداشت‌ها
-      let notes = {};
-      try {
-        notes = JSON.parse(localStorage.getItem("taxiNotes") || "{}");
-      } catch (e) {}
-      let currentNotePerson = null;
-      const overlay = $("#modalOverlay"),
-        popup = $("#notePopup"),
-        noteText = $("#noteText"),
-        noteSavedEl = $("#noteSaved");
-      function attachNameEvents() {
-        document.querySelectorAll(".person-name").forEach((el) => {
-          el.addEventListener("dblclick", () => openNote(el.dataset.name));
-          el.addEventListener("mousedown", (e) => e.preventDefault());
-        });
-      }
-      function openNote(name) {
-        currentNotePerson = name;
-        noteText.value = notes[name] || "";
-        $("#noteTitle").textContent = `یادداشت برای: ${name}`;
-        overlay.classList.add("show");
-        overlay.setAttribute("aria-hidden", "false");
-        popup.classList.add("show");
-        popup.setAttribute("aria-hidden", "false");
-        setTimeout(() => noteText.focus(), 120);
-      }
-      function closeNote() {
-        popup.classList.remove("show");
-        popup.setAttribute("aria-hidden", "true");
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden", "true");
-      }
-      $("#saveNote").addEventListener("click", () => {
-        if (!currentNotePerson) return;
-        notes[currentNotePerson] = noteText.value;
-        try {
-          localStorage.setItem("taxiNotes", JSON.stringify(notes));
-        } catch (e) {}
-        noteSavedEl.classList.add("show");
-        setTimeout(() => noteSavedEl.classList.remove("show"), 1500);
-        closeNote();
-      });
-      $("#closeNote").addEventListener("click", closeNote);
-      overlay.addEventListener("click", closeNote);
+  const trs = document.querySelectorAll("#full-schedule tbody tr");
+  trs.forEach((tr,i)=>{ tr.style.animationDelay = (i*0.07) + "s"; });
+}
 
-      updateClock();
-      renderCurrentShifts();
-      renderFullSchedule();
-      setInterval(updateClock, 1000);
-      setInterval(renderCurrentShifts, 1000);
-    </script>
-  </body>
+$("#exportBtn").addEventListener("click", function(){
+  const table=$("#full-schedule");
+  if(!table) return alert("جدول هنوز آماده نشده!");
+  const wb=XLSX.utils.table_to_book(table,{sheet:"Shifts"});
+  XLSX.writeFile(wb,"Justice_Shifts.xlsx");
+});
+
+updateClock();
+renderCurrentShifts();
+renderFullSchedule();
+setInterval(updateClock,1000);
+setInterval(renderCurrentShifts,1000);
+</script>
+</body>
 </html>
-
 
