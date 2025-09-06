@@ -109,16 +109,18 @@ tr:hover { background: rgba(255,255,255,0.07); transition: background 0.3s ease;
 const shifts = [
   { name:"Hoshan Amiri", rank:"Faction Helper", times:[{days:"همه روزها", start:"15:30", end:"18:30"}]},
   { name:"Omid Ghamkhar", rank:"Faction Helper", times:[{days:"همه روزها", start:"16:00", end:"19:00"}]},
-  { name:"Artin Hamidi", rank:"Attorney General", times:[{days:"همه روزها", start:"19:00", end:"22:00"}]},
   { name:"Giovanni Vitelli", rank:"Deputy Attorney General", times:[{days:"همه روزها", start:"14:00", end:"17:00"}]},
   { name:"Mahbod Shalchi", rank:"Chief Justice", times:[{days:"همه روزها", start:"12:00", end:"15:00"}]},
-  { name:"Mohammad Kashanzadeh", rank:"Chief Justice", times:[{days:"همه روزها", start:"20:00", end:"23:00"}]},
   { name:"MohammadTaha Rayat", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"Free Time", end:"Free Time"},]},
   { name:"Mohammad Mansoori", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"14:00", end:"17:00"}]},
   { name:"Dante Salvatore", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"15:00", end:"18:00"}]},
-  { name:"Mahdi Farhadi", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"18:00", end:"21:00"}]},
-  { name:"Michael Rock", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"20:00", end:"23:00"}]},
+  { name:"Ardeshir Rastegar", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"20:00", end:"23:00"}]},
+  { name:"Pooya Boroj", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"21:00", end:"24:00"}]},
+  { name:"MohammadReza Rahmani", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"21:00", end:"24:00"}]},
+  { name:"Ali Nemati", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"21:00", end:"24:00"}]},
+  { name:"AliAkbar Ranjbar", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"20:00", end:"23:00"}]}, 
   { name:"Radin Dehpana", rank:"Assocciate Justice", times:[{days:"همه روزها", start:"17:00", end:"21:00"}]},];
+
 
 const rankOrder = {"Faction Helper":1,"Attorney General":2,"Deputy Attorney General":3,"Chief Justice":4,"Assocciate Justice":5};
 function $(s){return document.querySelector(s);}
@@ -244,4 +246,3 @@ setInterval(renderCurrentShifts,1000);
 </script>
 </body>
 </html>
-
